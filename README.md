@@ -1,10 +1,12 @@
 # Legal-Ops Copilot — Product Counsel demo
 
 An interview prototype for a Product Counsel role: an internal legal-ops tool
-presented as a clickable US map. Selecting a jurisdiction shows a sample
-"issue-spot" brief across legal domains (alcohol, pharmacy, payments, privacy,
-consumer protection, advertising), plus a triage search and a "route to
-specialist" flow. A stubbed **Global (Phase 2)** view is included.
+presented as a clickable map of US states and Canadian provinces. Selecting a
+jurisdiction shows a sample "issue-spot" brief across legal domains (alcohol,
+pharmacy, payments, privacy, consumer protection, advertising), plus a triage
+search and a "route to specialist" flow. A clearly-labeled **Expansion Horizon
+(strategic, not current)** view maps regimes that would activate on
+international expansion — hypothetical future scope, not present operations.
 
 ## ⚠️ Illustrative sample content only — not legal advice
 
@@ -22,6 +24,11 @@ non-authoritative caveat at the top of the file.
 
 - [Vite](https://vitejs.dev/) + React + TypeScript
 - [`lucide-react`](https://lucide.dev/) for icons
+- [`d3-geo`](https://github.com/d3/d3-geo) renders the geographic map (Albers
+  projection) directly from bundled boundary data — no map library / runtime
+  fetch. Boundaries are [Natural Earth](https://www.naturalearthdata.com/)
+  1:50m admin-1 (public domain), slimmed to US states + Canadian provinces in
+  [`src/data/geo/na-admin1.json`](src/data/geo/na-admin1.json).
 - No backend. The triage search is a **client-side keyword match**, isolated
   behind a single function (`src/lib/triage.ts`) so a real AI-backed endpoint
   can be slotted in later without touching the UI. Live AI/agentic Q&A is a

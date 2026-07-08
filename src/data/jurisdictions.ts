@@ -6,7 +6,7 @@
 // Nothing here should be relied on. Risk tiers, flags, and notes are
 // illustrative only and public-information-based.
 
-import { CreditCard, Lock, Wine, Scale, Megaphone } from 'lucide-react'
+import { CreditCard, Lock, Wine, Scale, Megaphone, Pill } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 /** Legal domains the copilot triages across. */
@@ -16,6 +16,7 @@ export type DomainKey =
   | 'privacy'
   | 'consumer'
   | 'advertising'
+  | 'pharmacy'
 
 /** Illustrative risk tier for a jurisdiction. */
 export type TierKey = 'high' | 'medium' | 'low'
@@ -52,9 +53,11 @@ export const DOMAINS: Record<DomainKey, Domain> = {
   privacy: { label: 'Privacy', icon: Lock, color: '#2563eb' },
   consumer: { label: 'Consumer Protection', icon: Scale, color: '#ca8a04' },
   advertising: { label: 'Advertising / Merch', icon: Megaphone, color: '#db2777' },
+  pharmacy: { label: 'Pharmacy / Rx', icon: Pill, color: '#dc2626' },
 }
 
-// A handful of representative states with sample issue-spots.
+// A handful of representative states with sample issue-spots. Keyed by the
+// two-letter postal code, which is how the map matches geography to data.
 // Risk tiers are illustrative only.
 export const STATES: Record<string, StateInfo> = {
   CA: {
@@ -65,6 +68,7 @@ export const STATES: Record<string, StateInfo> = {
       { d: 'alcohol', note: 'State-specific licensing & delivery-hours constraints; ID-verification workflow review.' },
       { d: 'consumer', note: 'Robust consumer-protection regime; auto-renewal & pricing-disclosure sample flag.' },
       { d: 'advertising', note: "Disclosure rules for promoted placements; 'sponsored' labeling review." },
+      { d: 'pharmacy', note: 'Rx delivery: ID-scan + signature workflow; controlled-substance & specialty-med exclusions; HIPAA-adjacent handling review.' },
     ],
   },
   TX: {
@@ -74,6 +78,7 @@ export const STATES: Record<string, StateInfo> = {
       { d: 'alcohol', note: 'Distinct licensing tiers & delivery rules; hours/holiday restriction review.' },
       { d: 'payments', note: 'Money-transmission posture check for stored value / tips flows (sample).' },
       { d: 'consumer', note: 'Deceptive-practices statute; pricing & fee-transparency sample flag.' },
+      { d: 'pharmacy', note: 'Rx delivery permitted with ID verification; controlled-substance exclusion & partner-pharmacy scope review.' },
     ],
   },
   NY: {
@@ -92,6 +97,7 @@ export const STATES: Record<string, StateInfo> = {
     flags: [
       { d: 'alcohol', note: 'Delivery permissions vary by license class; verification workflow review.' },
       { d: 'privacy', note: 'State privacy law scope check for large-processor thresholds (sample).' },
+      { d: 'pharmacy', note: 'Rx delivery active via partner pharmacies; signature-on-delivery rule review.' },
     ],
   },
   IL: {
@@ -150,10 +156,3 @@ export const TIER: Record<TierKey, TierInfo> = {
   medium: { label: 'Moderate', color: '#d97706', bg: '#fffbeb' },
   low: { label: 'Baseline', color: '#16a34a', bg: '#f0fdf4' },
 }
-
-// Simplified grid layout (not geographic — a schematic board).
-export const GRID: (string | null)[][] = [
-  ['WA', null, null, null, null, null, null, null, null, 'MA'],
-  ['CO', 'IL', null, null, null, null, null, 'PA', 'NY', null],
-  ['CA', null, 'TX', null, null, 'GA', 'FL', null, null, null],
-]

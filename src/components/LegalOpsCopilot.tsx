@@ -7,10 +7,15 @@ import {
   Info,
   X,
   Scale,
+  Globe,
 } from 'lucide-react'
-import { DOMAINS, STATES, TIER, GRID } from '../data/jurisdictions'
+import { DOMAINS, STATES, TIER } from '../data/jurisdictions'
 import type { Domain, DomainKey } from '../data/jurisdictions'
 import { runTriage } from '../lib/triage'
+import FootprintMap from './FootprintMap'
+import ExpansionView from './ExpansionView'
+
+type View = 'us' | 'global'
 
 export default function LegalOpsCopilot() {
   const [selected, setSelected] = useState<string>('CA')
@@ -18,6 +23,7 @@ export default function LegalOpsCopilot() {
   const [domainFilter, setDomainFilter] = useState<DomainKey | null>(null)
   const [showAbout, setShowAbout] = useState(false)
   const [routed, setRouted] = useState<DomainKey | null>(null)
+  const [view, setView] = useState<View>('us')
 
   const state = STATES[selected]
 
@@ -48,6 +54,19 @@ export default function LegalOpsCopilot() {
         <span><strong>Prototype — illustrative sample content only.</strong> Not legal advice, not authoritative. Every output is a draft issue-spot for a human attorney to review.</span>
       </div>
 
+      {/* Footprint toggle: current vs expansion */}
+      <div style={{ display: "flex", gap: 8, padding: "14px 20px 0", flexWrap: "wrap" }}>
+        <button onClick={() => setView("us")} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, padding: "7px 14px", borderRadius: 8, cursor: "pointer", border: "1px solid #e2e8f0", background: view === "us" ? "#0f172a" : "white", color: view === "us" ? "white" : "#475569" }}>
+          <Scale size={14} /> Current Footprint · US &amp; Canada
+        </button>
+        <button onClick={() => setView("global")} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, padding: "7px 14px", borderRadius: 8, cursor: "pointer", border: "1px solid #e2e8f0", background: view === "global" ? "#0f172a" : "white", color: view === "global" ? "white" : "#475569" }}>
+          <Globe size={14} /> Expansion Horizon <span style={{ fontSize: 10, fontWeight: 700, background: "#e0e7ff", color: "#4338ca", padding: "1px 6px", borderRadius: 10 }}>STRATEGIC</span>
+        </button>
+      </div>
+
+      {view === "global" ? (
+        <ExpansionView />
+      ) : (
       <div style={{ display: "flex", flexWrap: "wrap", gap: 16, padding: 20, alignItems: "flex-start" }}>
         {/* Left: map + triage */}
         <div style={{ flex: "1 1 420px", minWidth: 320 }}>
@@ -88,39 +107,27 @@ export default function LegalOpsCopilot() {
             )}
           </div>
 
-          {/* Schematic map */}
+          {/* Geographic map */}
           <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 12, padding: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#475569" }}>Operating footprint (schematic)</div>
-            <div style={{ fontSize: 11.5, color: "#94a3b8", marginBottom: 12 }}>Click a jurisdiction for its sample issue-spot brief. Color = illustrative risk tier.</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {GRID.map((row, ri) => (
-                <div key={ri} style={{ display: "flex", gap: 6, justifyContent: "center" }}>
-                  {row.map((code, ci) => {
-                    if (!code) return <div key={ci} style={{ width: 52, height: 44 }} />
-                    const s = STATES[code]
-                    const t = TIER[s.tier]
-                    const active = selected === code
-                    return (
-                      <button
-                        key={ci}
-                        onClick={() => { setSelected(code); setDomainFilter(null); setRouted(null); }}
-                        style={{
-                          width: 52, height: 44, borderRadius: 8, cursor: "pointer",
-                          border: active ? "2px solid #0f172a" : "1px solid " + t.color + "55",
-                          background: active ? "#0f172a" : t.bg,
-                          color: active ? "white" : t.color,
-                          fontWeight: 700, fontSize: 13,
-                          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                        }}
-                      >
-                        {code}
-                        <span style={{ fontSize: 8, fontWeight: 500 }}>{s.flags.length} flags</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              ))}
+            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#475569" }}>Operating footprint · US &amp; Canada</div>
+            <div style={{ fontSize: 11.5, color: "#94a3b8", marginBottom: 12 }}>Click a shaded jurisdiction for its sample issue-spot brief. Color = illustrative risk tier. Unshaded states are not in this sample set.</div>
+
+            {/* Canada band */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8, marginBottom: 10 }}>
+              <span style={{ fontSize: 16 }}>🍁</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12.5, fontWeight: 600, color: "#334155" }}>Canada</div>
+                <div style={{ fontSize: 11, color: "#94a3b8" }}>PIPEDA + Quebec Law 25 · provincial alcohol & privacy variation</div>
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#0891b2", background: "#ecfeff", padding: "3px 8px", borderRadius: 10, border: "1px solid #a5f3fc" }}>live</span>
             </div>
+
+            {/* Real geographic map (US states + Canadian provinces) */}
+            <FootprintMap
+              selected={selected}
+              onSelect={(code) => { setSelected(code); setDomainFilter(null); setRouted(null); }}
+            />
+
             {/* legend */}
             <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 14, flexWrap: "wrap" }}>
               {Object.entries(TIER).map(([k, v]) => (
@@ -128,6 +135,9 @@ export default function LegalOpsCopilot() {
                   <span style={{ width: 12, height: 12, borderRadius: 3, background: v.bg, border: "1px solid " + v.color }} /> {v.label}
                 </div>
               ))}
+              <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, color: "#64748b" }}>
+                <span style={{ width: 12, height: 12, borderRadius: 3, background: "#f1f5f9", border: "1px solid #cbd5e1" }} /> Not in sample
+              </div>
             </div>
           </div>
         </div>
@@ -193,6 +203,7 @@ export default function LegalOpsCopilot() {
           </div>
         </div>
       </div>
+      )}
 
       {/* About modal */}
       {showAbout && (
