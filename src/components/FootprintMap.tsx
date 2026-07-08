@@ -2,9 +2,10 @@ import { useMemo, useState } from 'react'
 import { geoAlbers, geoPath, geoCentroid } from 'd3-geo'
 import { naGeo } from '../data/geo'
 import { STATES, TIER } from '../data/jurisdictions'
+import { ACCENT, ACCENT_DARK } from '../theme'
 
 const WIDTH = 820
-const HEIGHT = 500
+const HEIGHT = 520
 const PAD = 16
 
 // Non-active geography styling.
@@ -12,7 +13,8 @@ const CANADA_FILL = '#ecfeff' // live footprint, but no per-province sample data
 const CANADA_STROKE = '#67e8f9'
 const NEUTRAL_FILL = '#f1f5f9' // US states with no sample brief ("not in sample")
 const NEUTRAL_STROKE = '#e2e8f0'
-const SELECTED = '#0f172a'
+const MEXICO_FILL = '#eef1f4' // adjacent market — present but not operated
+const MEXICO_STROKE = '#cbd5e1'
 
 interface Props {
   selected: string
@@ -23,16 +25,16 @@ interface Shape {
   key: string
   code: string
   name: string
-  admin: 'US' | 'CA'
+  admin: 'US' | 'CA' | 'MX'
   active: boolean
   d: string
 }
 
 // A geography carries a sample brief when its postal code is in STATES and the
 // country matches (US state vs. Canadian province — guards against any code
-// collision between the two sets).
-function isActive(admin: 'US' | 'CA', code: string): boolean {
-  if (!(code in STATES)) return false
+// collision between the two sets). Mexico is never active.
+function isActive(admin: 'US' | 'CA' | 'MX', code: string): boolean {
+  if (admin === 'MX' || !(code in STATES)) return false
   const isCanadaData = STATES[code].country === 'CA'
   return admin === 'CA' ? isCanadaData : !isCanadaData
 }
@@ -41,7 +43,7 @@ export default function FootprintMap({ selected, onSelect }: Props) {
   const [hovered, setHovered] = useState<string | null>(null)
 
   // Projection + path geometry are static — compute once.
-  const { shapes, labels } = useMemo(() => {
+  const { shapes, labels, mexicoLabel } = useMemo(() => {
     const projection = geoAlbers()
       .rotate([98, 0])
       .parallels([29.5, 49.5])
@@ -75,7 +77,11 @@ export default function FootprintMap({ selected, onSelect }: Props) {
         return { code: f.properties.postal, x, y }
       })
 
-    return { shapes, labels }
+    // A single muted "Mexico" label anchored to central Mexico (~23°N, 102°W).
+    const [mx, my] = projection([-102, 23]) ?? [0, 0]
+    const mexicoLabel = { x: mx, y: my }
+
+    return { shapes, labels, mexicoLabel }
   }, [])
 
   return (
@@ -83,11 +89,12 @@ export default function FootprintMap({ selected, onSelect }: Props) {
       viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
       style={{ width: '100%', height: 'auto', display: 'block' }}
       role="img"
-      aria-label="Map of US states and Canadian provinces; sample jurisdictions are shaded by risk tier"
+      aria-label="Map of US states and Canadian provinces (active, shaded by risk tier), with Mexico shown greyed-out as an adjacent market with no current operations"
     >
       {shapes.map((s) => {
         const isSelected = s.active && s.code === selected
         const isHovered = s.active && s.code === hovered
+        const isMexico = s.admin === 'MX'
 
         let fill = NEUTRAL_FILL
         let stroke = NEUTRAL_STROKE
@@ -98,18 +105,22 @@ export default function FootprintMap({ selected, onSelect }: Props) {
         } else if (s.admin === 'CA') {
           fill = CANADA_FILL
           stroke = CANADA_STROKE
+        } else if (isMexico) {
+          fill = MEXICO_FILL
+          stroke = MEXICO_STROKE
         }
 
         return (
           <path
             key={s.key}
             d={s.d}
-            fill={isSelected ? SELECTED : fill}
-            stroke={isSelected ? SELECTED : stroke}
-            strokeWidth={isSelected ? 1.6 : 0.6}
+            fill={isSelected ? ACCENT : fill}
+            stroke={isSelected ? ACCENT_DARK : stroke}
+            strokeWidth={isSelected ? 1.8 : isMexico ? 1 : 0.6}
+            strokeDasharray={isMexico ? '4 3' : undefined}
             style={{
               cursor: s.active ? 'pointer' : 'default',
-              opacity: isHovered ? 0.82 : 1,
+              opacity: isMexico ? 0.6 : isHovered ? 0.82 : 1,
               transition: 'fill .12s, opacity .12s',
               outline: 'none',
             }}
@@ -118,8 +129,9 @@ export default function FootprintMap({ selected, onSelect }: Props) {
             onMouseLeave={s.active ? () => setHovered(null) : undefined}
           >
             <title>
-              {s.name}
-              {s.active ? ` — ${STATES[s.code].flags.length} sample flags` : ''}
+              {isMexico
+                ? 'Mexico — no current operations / adjacent market'
+                : `${s.name}${s.active ? ` — ${STATES[s.code].flags.length} sample flags` : ''}`}
             </title>
           </path>
         )
@@ -143,6 +155,23 @@ export default function FootprintMap({ selected, onSelect }: Props) {
           {l.code}
         </text>
       ))}
+
+      <text
+        x={mexicoLabel.x}
+        y={mexicoLabel.y}
+        textAnchor="middle"
+        dominantBaseline="central"
+        style={{
+          fontSize: 12,
+          fontWeight: 600,
+          fill: '#94a3b8',
+          letterSpacing: 0.5,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      >
+        Mexico
+      </text>
     </svg>
   )
 }

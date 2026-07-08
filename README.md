@@ -1,12 +1,17 @@
-# Legal-Ops Copilot — Product Counsel demo
+# Product Counsel — Concept Demo
 
-An interview prototype for a Product Counsel role: an internal legal-ops tool
-presented as a clickable map of US states and Canadian provinces. Selecting a
-jurisdiction shows a sample "issue-spot" brief across legal domains (alcohol,
-pharmacy, payments, privacy, consumer protection, advertising), plus a triage
-search and a "route to specialist" flow. A clearly-labeled **Expansion Horizon
-(strategic, not current)** view maps regimes that would activate on
-international expansion — hypothetical future scope, not present operations.
+An interview concept demo for a Product Counsel role — a visual extension of a
+résumé, presented as a single-page internal legal-ops tool. A sticky-nav one-pager
+with three stacked sections:
+
+- **North American Footprint** — a clickable map of US states + Canadian provinces
+  (Quebec, Ontario), with Mexico shown greyed-out as an adjacent market (no current
+  operations). Selecting a jurisdiction shows a sample "issue-spot" brief across
+  legal domains (alcohol, pharmacy, payments, privacy, consumer protection,
+  advertising), plus a triage search and a "route to specialist" flow.
+- **Expansion Horizon** — clearly labeled **strategic, NOT current** — regimes that
+  would activate on international expansion (hypothetical future scope).
+- **Research Library** — a self-directed study map with primary-source links.
 
 ## ⚠️ Illustrative sample content only — not legal advice
 
