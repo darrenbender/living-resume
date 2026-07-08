@@ -28,6 +28,15 @@ interface Shape {
   d: string
 }
 
+// A geography carries a sample brief when its postal code is in STATES and the
+// country matches (US state vs. Canadian province — guards against any code
+// collision between the two sets).
+function isActive(admin: 'US' | 'CA', code: string): boolean {
+  if (!(code in STATES)) return false
+  const isCanadaData = STATES[code].country === 'CA'
+  return admin === 'CA' ? isCanadaData : !isCanadaData
+}
+
 export default function FootprintMap({ selected, onSelect }: Props) {
   const [hovered, setHovered] = useState<string | null>(null)
 
@@ -47,7 +56,7 @@ export default function FootprintMap({ selected, onSelect }: Props) {
 
     const shapes: Shape[] = naGeo.features.map((f, i) => {
       const code = f.properties.postal
-      const active = f.properties.admin === 'US' && code in STATES
+      const active = isActive(f.properties.admin, code)
       return {
         key: `${f.properties.admin}-${code}-${i}`,
         code,
@@ -58,9 +67,9 @@ export default function FootprintMap({ selected, onSelect }: Props) {
       }
     })
 
-    // Place the two-letter code at the centroid of each active state.
+    // Place the two-letter code at the centroid of each active jurisdiction.
     const labels = naGeo.features
-      .filter((f) => f.properties.admin === 'US' && f.properties.postal in STATES)
+      .filter((f) => isActive(f.properties.admin, f.properties.postal))
       .map((f) => {
         const [x, y] = projection(geoCentroid(f)) ?? [0, 0]
         return { code: f.properties.postal, x, y }

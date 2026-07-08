@@ -38,6 +38,8 @@ export interface Flag {
 export interface StateInfo {
   name: string
   tier: TierKey
+  /** Country the jurisdiction sits in. Omitted = US state; 'CA' = Canadian province. */
+  country?: 'CA'
   flags: Flag[]
 }
 
@@ -147,6 +149,26 @@ export const STATES: Record<string, StateInfo> = {
     flags: [
       { d: 'privacy', note: 'State privacy act in force; opt-out & profiling UX review.' },
       { d: 'alcohol', note: 'Delivery framework with licensing conditions.' },
+    ],
+  },
+  QC: {
+    name: 'Quebec (Canada)',
+    tier: 'high',
+    country: 'CA',
+    flags: [
+      { d: 'privacy', note: "Law 25: Quebec's stringent private-sector privacy regime — express consent, privacy-by-default, mandatory privacy officer, breach reporting, and data-portability. Stricter than most US state laws." },
+      { d: 'consumer', note: 'French-language requirements (Charter of the French Language) for consumer-facing UX, contracts, and marketing — a distinct localization/compliance duty.' },
+      { d: 'alcohol', note: 'Alcohol sale/delivery routed through provincial monopoly (SAQ) framework; distinct from US retail models.' },
+    ],
+  },
+  ON: {
+    name: 'Ontario (Canada)',
+    tier: 'medium',
+    country: 'CA',
+    flags: [
+      { d: 'privacy', note: 'Federal PIPEDA governs commercial data (no Quebec-style provincial private-sector law); consent + access rights.' },
+      { d: 'alcohol', note: 'Delivery via provincial framework (LCBO / licensed retail); age verification at handoff.' },
+      { d: 'consumer', note: 'Provincial consumer-protection statute; bilingual considerations for national campaigns.' },
     ],
   },
 }

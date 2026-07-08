@@ -8,14 +8,16 @@ import {
   X,
   Scale,
   Globe,
+  BookOpen,
 } from 'lucide-react'
 import { DOMAINS, STATES, TIER } from '../data/jurisdictions'
 import type { Domain, DomainKey } from '../data/jurisdictions'
 import { runTriage } from '../lib/triage'
 import FootprintMap from './FootprintMap'
 import ExpansionView from './ExpansionView'
+import ResearchLibrary from './ResearchLibrary'
 
-type View = 'us' | 'global'
+type View = 'us' | 'global' | 'research'
 
 export default function LegalOpsCopilot() {
   const [selected, setSelected] = useState<string>('CA')
@@ -62,9 +64,14 @@ export default function LegalOpsCopilot() {
         <button onClick={() => setView("global")} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, padding: "7px 14px", borderRadius: 8, cursor: "pointer", border: "1px solid #e2e8f0", background: view === "global" ? "#0f172a" : "white", color: view === "global" ? "white" : "#475569" }}>
           <Globe size={14} /> Expansion Horizon <span style={{ fontSize: 10, fontWeight: 700, background: "#e0e7ff", color: "#4338ca", padding: "1px 6px", borderRadius: 10 }}>STRATEGIC</span>
         </button>
+        <button onClick={() => setView("research")} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, padding: "7px 14px", borderRadius: 8, cursor: "pointer", border: "1px solid #e2e8f0", background: view === "research" ? "#0f172a" : "white", color: view === "research" ? "white" : "#475569" }}>
+          <BookOpen size={14} /> Research Library
+        </button>
       </div>
 
-      {view === "global" ? (
+      {view === "research" ? (
+        <ResearchLibrary />
+      ) : view === "global" ? (
         <ExpansionView />
       ) : (
       <div style={{ display: "flex", flexWrap: "wrap", gap: 16, padding: 20, alignItems: "flex-start" }}>
@@ -112,14 +119,35 @@ export default function LegalOpsCopilot() {
             <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4, color: "#475569" }}>Operating footprint · US &amp; Canada</div>
             <div style={{ fontSize: 11.5, color: "#94a3b8", marginBottom: 12 }}>Click a shaded jurisdiction for its sample issue-spot brief. Color = illustrative risk tier. Unshaded states are not in this sample set.</div>
 
-            {/* Canada band */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8, marginBottom: 10 }}>
-              <span style={{ fontSize: 16 }}>🍁</span>
-              <div style={{ flex: 1 }}>
+            {/* Canada band — clickable provinces */}
+            <div style={{ padding: "8px 10px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8, marginBottom: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <span style={{ fontSize: 16 }}>🍁</span>
                 <div style={{ fontSize: 12.5, fontWeight: 600, color: "#334155" }}>Canada</div>
-                <div style={{ fontSize: 11, color: "#94a3b8" }}>PIPEDA + Quebec Law 25 · provincial alcohol & privacy variation</div>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "#0891b2", background: "#ecfeff", padding: "2px 7px", borderRadius: 10, border: "1px solid #a5f3fc" }}>live footprint</span>
               </div>
-              <span style={{ fontSize: 11, fontWeight: 600, color: "#0891b2", background: "#ecfeff", padding: "3px 8px", borderRadius: 10, border: "1px solid #a5f3fc" }}>live</span>
+              <div style={{ display: "flex", gap: 6 }}>
+                {["QC", "ON"].map((code) => {
+                  const s = STATES[code]
+                  const t = TIER[s.tier]
+                  const active = selected === code
+                  return (
+                    <button
+                      key={code}
+                      onClick={() => { setSelected(code); setDomainFilter(null); setRouted(null); }}
+                      style={{
+                        flex: 1, padding: "8px 10px", borderRadius: 7, cursor: "pointer",
+                        border: active ? "2px solid #0f172a" : "1px solid " + t.color + "66",
+                        background: active ? "#0f172a" : t.bg,
+                        color: active ? "white" : t.color,
+                        fontWeight: 600, fontSize: 12, textAlign: "left",
+                      }}
+                    >
+                      {s.name.replace(" (Canada)", "")} <span style={{ fontSize: 10, opacity: 0.8 }}>· {s.flags.length}</span>
+                    </button>
+                  )
+                })}
+              </div>
             </div>
 
             {/* Real geographic map (US states + Canadian provinces) */}
