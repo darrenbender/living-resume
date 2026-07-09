@@ -15,9 +15,9 @@ export default function ResumeSection() {
         <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 12, padding: 18 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10 }}>
             <div style={{ width: 34, height: 34, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "#f0fdf4" }}><Briefcase size={18} color={ACCENT} /></div>
-            <span style={{ fontSize: 15, fontWeight: 700 }}>What I do</span>
+            <span style={{ fontSize: 15, fontWeight: 700 }}>How I'd work the seat</span>
           </div>
-          <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.6 }}>I'm a product counsel. I sit with product and engineering, spot the jurisdictional and regulatory issues a launch will hit, triage them quickly, and route the hard calls to the right specialist — turning legal from a gate into a velocity function.</div>
+          <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.6 }}>I sit with product and engineering, spot the jurisdictional and regulatory issues a launch will hit, triage them quickly, and route the hard calls to the right specialist — turning legal from a gate into a velocity function.</div>
         </div>
         <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 12, padding: 18 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10 }}>
@@ -31,7 +31,7 @@ export default function ResumeSection() {
             <div style={{ width: 34, height: 34, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "#eef2ff" }}><Target size={18} color="#4338ca" /></div>
             <span style={{ fontSize: 15, fontWeight: 700 }}>Why I'm a good fit</span>
           </div>
-          <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.6 }}>Everything here maps to the seat: the US & Canada footprint, the EU/UK expansion signals in the brief, and live products like Caper Carts, Storefront Pro and a Claude-powered assistant — across privacy, payments, alcohol, advertising and platform/UGC. I'm built to be the embedded, pragmatic counsel these products need.</div>
+          <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.6 }}>Everything here maps to the seat: the US & Canada footprint, the EU/UK expansion signals in the brief, and live products like Caper Carts, Storefront Pro, and the Instacart-in-Claude agentic shopping integration — across privacy, payments, alcohol, advertising and platform/UGC. I'm built to be the embedded, pragmatic counsel these products need.</div>
         </div>
       </div>
       <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 12, padding: "18px 20px", display: "flex", gap: 12, alignItems: "flex-start" }}>
