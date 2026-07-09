@@ -40,7 +40,7 @@ export default function ResearchLibrary() {
         ))}
       </div>
       <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 14, lineHeight: 1.5, textAlign: "center" }}>
-        Condensed from an 8-domain study map with full primary-source citations and case flags. Dated; verification-flagged throughout. Built to show initiative and fast-ramp, not claimed mastery.
+        Condensed from a 9-domain study map with full primary-source citations and case flags. Dated; verification-flagged throughout. Built to show initiative and fast-ramp, not claimed mastery.
       </div>
     </div>
   )

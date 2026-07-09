@@ -5,7 +5,7 @@
 // Illustrative issue-spotting scaffolding — NOT legal advice, NOT authoritative.
 // Case-law status and statute counts require verification; caveats are preserved.
 
-import { Lock, CreditCard, Megaphone, Scale, BookOpen, ShieldCheck, Wine, Pill } from 'lucide-react'
+import { Lock, CreditCard, Megaphone, Scale, BookOpen, ShieldCheck, Wine, Pill, MessageSquare } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 export interface ResearchLink {
@@ -148,5 +148,19 @@ export const RESEARCH: ResearchDomain[] = [
       { label: 'HHS — HIPAA Privacy Rule', url: 'https://www.hhs.gov/hipaa/for-professionals/privacy/laws-regulations/index.html' },
     ],
     caveat: 'DEA telemedicine flexibilities repeatedly extended; permanent special-registration rule in rulemaking — confirm current status.',
+  },
+  {
+    id: 'platform', title: 'Platform Liability & UGC', icon: MessageSquare, color: '#ea580c',
+    issues: [
+      'Section 230 posture for user content — reviews, ratings, community Q&A (the Reddit-style model): immunity scope and its limits',
+      'Trust & safety: content-moderation policy, notice-and-action, repeat-infringer and appeals workflow',
+      'UGC license grant + creator/affiliate disclosures carried consistently across surfaces',
+      'Emerging duties: NetChoice-line state cases, minors\' safety, transparency reporting',
+    ],
+    links: [
+      { label: '47 U.S.C. § 230 (Cornell LII)', url: 'https://www.law.cornell.edu/uscode/text/47/230' },
+      { label: 'Moody v. NetChoice (Justia)', url: 'https://supreme.justia.com/cases/federal/us/603/22-277/' },
+    ],
+    caveat: 'The NetChoice line is fast-moving — verify current posture before relying on it.',
   },
 ]
