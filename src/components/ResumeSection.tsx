@@ -1,7 +1,11 @@
-import { Briefcase, Workflow, Target, Handshake } from 'lucide-react'
+import { useState } from 'react'
+import { Briefcase, Workflow, Target, Handshake, ShoppingCart } from 'lucide-react'
 import { ACCENT, ACCENT_DARK } from '../theme'
+import ContactModal from './ContactModal'
 
 export default function ResumeSection() {
+  const [contactOpen, setContactOpen] = useState(false)
+
   return (
     <div style={{ maxWidth: 1160, margin: "0 auto", padding: "16px 20px 32px" }}>
       <p style={{ fontSize: 14.5, color: "#334155", lineHeight: 1.6, maxWidth: 800, margin: "0 0 20px" }}>
@@ -32,12 +36,20 @@ export default function ResumeSection() {
       </div>
       <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 12, padding: "18px 20px", display: "flex", gap: 12, alignItems: "flex-start" }}>
         <Handshake size={20} style={{ color: ACCENT_DARK, flexShrink: 0, marginTop: 2 }} />
-        <div>
+        <div style={{ flex: 1 }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: "#166534", marginBottom: 4 }}>Thank you</div>
           <div style={{ fontSize: 13, color: "#14532d", lineHeight: 1.6 }}>Thank you for taking the time to click through this. I built it as a working sample of how I'd approach the role — not a finished tool, and all legal content is illustrative. I'd welcome the chance to talk it through.</div>
-          <div style={{ fontSize: 13.5, fontWeight: 700, color: "#166534", marginTop: 10 }}>— Darren Bender</div>
+          <button
+            onClick={() => setContactOpen(true)}
+            style={{ marginTop: 14, display: "inline-flex", alignItems: "center", gap: 8, background: ACCENT, color: "white", border: "none", borderRadius: 9, padding: "11px 16px", cursor: "pointer", fontSize: 14, fontWeight: 700 }}
+          >
+            <ShoppingCart size={16} /> Add Darren Bender to Cart
+          </button>
+          <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 8 }}>Sends a message straight to Darren — no email address needed.</div>
         </div>
       </div>
+
+      <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
     </div>
   )
 }

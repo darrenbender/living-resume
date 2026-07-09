@@ -11,7 +11,8 @@ import {
   Globe,
   Map as MapIcon,
   ListChecks,
-  User,
+  Mail,
+  Menu,
   MousePointerClick,
 } from 'lucide-react'
 import { DOMAINS, STATES, TIER, ANTICIPATED } from '../data/jurisdictions'
@@ -30,7 +31,7 @@ const NAV = [
   { id: 'workstream', label: 'Product Workstream', Icon: ListChecks },
   { id: 'expansion', label: 'Expansion Horizon', Icon: Globe },
   { id: 'research', label: 'Law Library', Icon: Scale },
-  { id: 'resume', label: 'Résumé', Icon: User },
+  { id: 'resume', label: 'Contact Us', Icon: Mail },
 ] as const
 
 // Clears the sticky header when an anchor is scrolled to; matches the
@@ -42,6 +43,19 @@ const RES_BY_ID: Record<string, (typeof RESEARCH)[number]> = {}
 RESEARCH.forEach((r) => {
   RES_BY_ID[r.id] = r
 })
+
+// Tracks whether the viewport is at or below a mobile breakpoint.
+function useIsMobile(maxWidth: number) {
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia(`(max-width: ${maxWidth}px)`).matches)
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${maxWidth}px)`)
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [maxWidth])
+  return isMobile
+}
 
 function SectionHead({
   num,
@@ -87,6 +101,8 @@ export default function LegalOpsCopilot() {
   const [activeSection, setActiveSection] = useState('footprint')
   const [hintDismissed, setHintDismissed] = useState(false)
   const [hoveredFlag, setHoveredFlag] = useState<number | null>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const isMobile = useIsMobile(768)
 
   // While a nav click is smooth-scrolling, ignore observer updates so the
   // highlight doesn't flicker through the sections being scrolled past.
@@ -141,6 +157,11 @@ export default function LegalOpsCopilot() {
     }
   }, [])
 
+  // Collapse the mobile menu when the viewport grows to desktop.
+  useEffect(() => {
+    if (!isMobile) setMobileMenuOpen(false)
+  }, [isMobile])
+
   // Scroll-spy: highlight the nav item for whichever section is in view.
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -187,44 +208,90 @@ export default function LegalOpsCopilot() {
     <div style={{ fontFamily: "ui-sans-serif, system-ui, Arial", background: "#f8fafc", minHeight: "100%", color: INK }}>
       {/* Frozen header + nav */}
       <header style={{ position: "sticky", top: 0, zIndex: 40, background: INK, color: "white", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }}>
-        <div style={{ padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Scale size={22} color={ACCENT} />
-            <div>
+        <div style={{ padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+            <Scale size={22} color={ACCENT} style={{ flexShrink: 0 }} />
+            <div style={{ minWidth: 0 }}>
               <div style={{ fontWeight: 700, fontSize: 17 }}>Product Counsel — Concept Demo</div>
               <div style={{ fontSize: 12, color: "#94a3b8" }}>A visual extension of my résumé · illustrative concept, not a finished tool</div>
             </div>
           </div>
-          <button onClick={() => setShowAbout(true)} style={{ display: "flex", alignItems: "center", gap: 6, background: "#1e293b", color: "#e2e8f0", border: "1px solid #334155", borderRadius: 8, padding: "8px 12px", cursor: "pointer", fontSize: 13 }}>
-            <Info size={15} /> How this works / limits
-          </button>
+          {isMobile ? (
+            <button
+              onClick={() => setMobileMenuOpen((o) => !o)}
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileMenuOpen}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "#1e293b", color: "#e2e8f0", border: "1px solid #334155", borderRadius: 8, padding: 8, cursor: "pointer", flexShrink: 0 }}
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          ) : (
+            <button onClick={() => setShowAbout(true)} style={{ display: "flex", alignItems: "center", gap: 6, background: "#1e293b", color: "#e2e8f0", border: "1px solid #334155", borderRadius: 8, padding: "8px 12px", cursor: "pointer", fontSize: 13, flexShrink: 0, whiteSpace: "nowrap" }}>
+              <Info size={15} /> How this works / limits
+            </button>
+          )}
         </div>
-        {/* section nav (scroll-spy, underline style) */}
-        <nav style={{ display: "flex", gap: 22, padding: "0 20px 10px", flexWrap: "wrap", justifyContent: "center" }}>
-          {NAV.map(({ id, label, Icon }) => {
-            const on = activeSection === id
-            return (
-              <a
-                key={id}
-                href={"#" + id}
-                onClick={() => onNavClick(id)}
-                aria-current={on ? "true" : undefined}
-                style={{
-                  display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600,
-                  padding: "6px 2px 7px", textDecoration: "none",
-                  color: on ? "white" : "#cbd5e1",
-                  background: "transparent",
-                  border: "none",
-                  borderBottom: "2px solid " + (on ? ACCENT : "transparent"),
-                  borderRadius: 0,
-                  transition: "color .15s, border-color .15s",
-                }}
-              >
-                <Icon size={13} /> {label}
-              </a>
-            )
-          })}
-        </nav>
+
+        {/* Desktop nav (scroll-spy, underline style) */}
+        {!isMobile && (
+          <nav style={{ display: "flex", gap: 22, padding: "0 20px 10px", flexWrap: "wrap", justifyContent: "center" }}>
+            {NAV.map(({ id, label, Icon }) => {
+              const on = activeSection === id
+              return (
+                <a
+                  key={id}
+                  href={"#" + id}
+                  onClick={() => onNavClick(id)}
+                  aria-current={on ? "true" : undefined}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600,
+                    padding: "6px 2px 7px", textDecoration: "none",
+                    color: on ? "white" : "#cbd5e1",
+                    background: "transparent",
+                    border: "none",
+                    borderBottom: "2px solid " + (on ? ACCENT : "transparent"),
+                    borderRadius: 0,
+                    transition: "color .15s, border-color .15s",
+                  }}
+                >
+                  <Icon size={13} /> {label}
+                </a>
+              )
+            })}
+          </nav>
+        )}
+
+        {/* Mobile dropdown menu */}
+        {isMobile && mobileMenuOpen && (
+          <nav style={{ borderTop: "1px solid #334155", paddingBottom: 6 }}>
+            {NAV.map(({ id, label, Icon }) => {
+              const on = activeSection === id
+              return (
+                <a
+                  key={id}
+                  href={"#" + id}
+                  onClick={() => { onNavClick(id); setMobileMenuOpen(false) }}
+                  aria-current={on ? "true" : undefined}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 10, fontSize: 15, fontWeight: 600,
+                    padding: "12px 20px", textDecoration: "none",
+                    color: on ? "white" : "#cbd5e1",
+                    background: on ? "rgba(47,158,68,0.14)" : "transparent",
+                    borderLeft: "3px solid " + (on ? ACCENT : "transparent"),
+                  }}
+                >
+                  <Icon size={17} /> {label}
+                </a>
+              )
+            })}
+            <button
+              onClick={() => { setShowAbout(true); setMobileMenuOpen(false) }}
+              style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", fontSize: 14, fontWeight: 600, padding: "12px 20px", marginTop: 4, background: "transparent", border: "none", borderTop: "1px solid #334155", color: "#cbd5e1", cursor: "pointer" }}
+            >
+              <Info size={16} /> How this works / limits
+            </button>
+          </nav>
+        )}
       </header>
 
       {/* Disclaimer banner */}
