@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { CSSProperties, FormEvent } from 'react'
 import { X, Send, Check, ShoppingCart } from 'lucide-react'
 import { ACCENT, ACCENT_DARK } from '../theme'
@@ -27,6 +27,18 @@ export default function ContactModal({ open, onClose }: { open: boolean; onClose
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState('')
 
+  // Close on Escape; reset to a fresh form each time it opens.
+  useEffect(() => {
+    if (!open) return
+    setStatus('idle')
+    setError('')
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
   if (!open) return null
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -46,7 +58,7 @@ export default function ContactModal({ open, onClose }: { open: boolean; onClose
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
           access_key: WEB3FORMS_ACCESS_KEY,
-          subject: 'New message from the Product Counsel demo',
+          subject: 'Product Counsel — Darren Bender',
           from_name: 'Product Counsel Demo',
           name: data.get('name'),
           email: data.get('email'),
@@ -67,7 +79,7 @@ export default function ContactModal({ open, onClose }: { open: boolean; onClose
 
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 60 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: 'white', borderRadius: 14, maxWidth: 460, width: '100%', padding: 24, maxHeight: '88vh', overflowY: 'auto' }}>
+      <div onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Contact Darren Bender" style={{ background: 'white', borderRadius: 14, maxWidth: 460, width: '100%', padding: 24, maxHeight: '88vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <ShoppingCart size={18} color={ACCENT} />
@@ -93,7 +105,7 @@ export default function ContactModal({ open, onClose }: { open: boolean; onClose
             <input type="text" name="botcheck" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }} />
 
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', margin: '10px 0 4px' }}>Your name</label>
-            <input name="name" required autoComplete="name" style={inputStyle} placeholder="Jane Rivera" />
+            <input name="name" required autoFocus autoComplete="name" style={inputStyle} placeholder="Jane Rivera" />
 
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', margin: '12px 0 4px' }}>Your email</label>
             <input name="email" type="email" required autoComplete="email" style={inputStyle} placeholder="jane@company.com" />

@@ -41,6 +41,7 @@ export default function ResumeSection() {
           <div style={{ fontSize: 13, color: "#14532d", lineHeight: 1.6 }}>Thank you for taking the time to click through this. I built it as a working sample of how I'd approach the role — not a finished tool, and all legal content is illustrative. I'd welcome the chance to talk it through.</div>
           <button
             onClick={() => setContactOpen(true)}
+            aria-haspopup="dialog"
             style={{ marginTop: 14, display: "inline-flex", alignItems: "center", gap: 8, background: ACCENT, color: "white", border: "none", borderRadius: 9, padding: "11px 16px", cursor: "pointer", fontSize: 14, fontWeight: 700 }}
           >
             <ShoppingCart size={16} /> Add Darren Bender to Cart

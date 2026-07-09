@@ -14,6 +14,8 @@ import {
   Mail,
   Menu,
   MousePointerClick,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react'
 import { DOMAINS, STATES, TIER, ANTICIPATED } from '../data/jurisdictions'
 import type { Domain, DomainKey, StateInfo, TierInfo, AnticipatedMarket } from '../data/jurisdictions'
@@ -113,7 +115,7 @@ export default function LegalOpsCopilot() {
   const [routed, setRouted] = useState<DomainKey | null>(null)
   const [activeSection, setActiveSection] = useState('footprint')
   const [hintDismissed, setHintDismissed] = useState(false)
-  const [hoveredFlag, setHoveredFlag] = useState<number | null>(null)
+  const [openFlag, setOpenFlag] = useState<number | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const isMobile = useIsMobile(768)
 
@@ -158,6 +160,11 @@ export default function LegalOpsCopilot() {
     if (!isMobile) setMobileMenuOpen(false)
   }, [isMobile])
 
+  // Close any open Law Library panel when the jurisdiction or filter changes.
+  useEffect(() => {
+    setOpenFlag(null)
+  }, [selected, domainFilter])
+
   // Scroll-spy: highlight the nav item for whichever section is in view.
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -180,13 +187,10 @@ export default function LegalOpsCopilot() {
   const visibleFlags =
     !isAnticipated && st ? (domainFilter ? st.flags.filter((f) => f.d === domainFilter) : st.flags) : []
 
+  // Just surface the routed confirmation; the banner itself carries the jump to
+  // #resume so the navigation reads as intentional (no pre-scroll flash).
   const routeBrief = () => {
     setRouted(visibleFlags[0]?.d ?? null)
-    try {
-      window.location.hash = 'resume'
-    } catch {
-      /* ignore */
-    }
   }
 
   // Brief header — current jurisdiction vs anticipated market
@@ -358,7 +362,7 @@ export default function LegalOpsCopilot() {
                   )
                 })}
               </div>
-              <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 8, lineHeight: 1.5 }}>Not a current market — select for an expansion-readiness brief. These markets aren't on the map above.</div>
+              <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 8, lineHeight: 1.5 }}>Not current markets, not on the map — a teaser that points into the Expansion Horizon section below.</div>
             </div>
 
             {/* Triage search */}
@@ -434,34 +438,44 @@ export default function LegalOpsCopilot() {
                     {visibleFlags.map((f, i) => {
                       const dm = DOMAINS[f.d]
                       const res = RES_BY_ID[f.d]
-                      const showPop = hoveredFlag === i && !!res
+                      const isOpen = openFlag === i && !!res
                       return (
-                        <div key={i} onMouseEnter={() => setHoveredFlag(i)} onMouseLeave={() => setHoveredFlag(null)} style={{ position: "relative", display: "flex", gap: 10, padding: "12px 0", borderBottom: i < visibleFlags.length - 1 ? "1px solid #f8fafc" : undefined }}>
+                        <div key={i} style={{ display: "flex", gap: 10, padding: "12px 0", borderBottom: i < visibleFlags.length - 1 ? "1px solid #f8fafc" : undefined }}>
                           <div style={{ width: 30, height: 30, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, background: dm.color + "14" }}>
                             {createElement(dm.icon, { size: 16, color: dm.color })}
                           </div>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 2 }}>
-                              <span style={{ fontSize: 12.5, fontWeight: 600, color: dm.color }}>{dm.label}</span>
-                              <Scale size={11} style={{ color: "#cbd5e1" }} aria-hidden="true" />
-                            </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 12.5, fontWeight: 600, color: dm.color, marginBottom: 2 }}>{dm.label}</div>
                             <div style={{ fontSize: 12.5, color: "#475569", lineHeight: 1.45 }}>{f.note}</div>
+                            {res && (
+                              <>
+                                <button
+                                  onClick={() => setOpenFlag(isOpen ? null : i)}
+                                  onKeyDown={(e) => { if (e.key === "Escape") setOpenFlag(null) }}
+                                  aria-expanded={isOpen}
+                                  aria-controls={`law-panel-${i}`}
+                                  style={{ marginTop: 7, display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600, color: res.color, background: res.color + "10", border: "1px solid " + res.color + "33", borderRadius: 7, padding: "3px 8px", cursor: "pointer" }}
+                                >
+                                  <Scale size={11} /> Law Library {isOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                                </button>
+                                {isOpen && (
+                                  <div id={`law-panel-${i}`} style={{ marginTop: 8, background: "#fbfdff", border: "1px solid " + res.color + "44", borderRadius: 10, padding: "10px 12px" }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 7, flexWrap: "wrap" }}>
+                                      <Scale size={13} style={{ color: res.color }} />
+                                      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: "#94a3b8" }}>LAW LIBRARY</span>
+                                      <span style={{ fontSize: 12.5, fontWeight: 700, color: res.color }}>{res.title}</span>
+                                    </div>
+                                    <ul style={{ margin: "0 0 6px", paddingLeft: 16 }}>
+                                      {res.issues.slice(0, 3).map((iss, j) => (
+                                        <li key={j} style={{ fontSize: 11.5, color: "#475569", lineHeight: 1.45, marginBottom: 4 }}>{iss}</li>
+                                      ))}
+                                    </ul>
+                                    <a href="#research" onClick={() => onNavClick("research")} style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600, color: res.color, textDecoration: "none" }}>View in Law Library <ArrowRight size={11} /></a>
+                                  </div>
+                                )}
+                              </>
+                            )}
                           </div>
-                          {showPop && res && (
-                            <div style={{ position: "absolute", left: 0, right: 0, top: "100%", marginTop: 2, zIndex: 20, background: "white", border: "1px solid " + res.color + "44", borderRadius: 10, boxShadow: "0 10px 28px rgba(15,23,42,.16)", padding: "12px 14px" }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 7, flexWrap: "wrap" }}>
-                                <Scale size={13} style={{ color: res.color }} />
-                                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: "#94a3b8" }}>LAW LIBRARY</span>
-                                <span style={{ fontSize: 12.5, fontWeight: 700, color: res.color }}>{res.title}</span>
-                              </div>
-                              <ul style={{ margin: "0 0 6px", paddingLeft: 16 }}>
-                                {res.issues.slice(0, 3).map((iss, j) => (
-                                  <li key={j} style={{ fontSize: 11.5, color: "#475569", lineHeight: 1.45, marginBottom: 4 }}>{iss}</li>
-                                ))}
-                              </ul>
-                              <a href="#research" style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600, color: res.color, textDecoration: "none" }}>View in Law Library <ArrowRight size={11} /></a>
-                            </div>
-                          )}
                         </div>
                       )
                     })}
@@ -473,7 +487,10 @@ export default function LegalOpsCopilot() {
                     {routed && (
                       <div style={{ marginTop: 12, background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 9, padding: "12px 14px", fontSize: 12.5, color: "#166534", display: "flex", gap: 8 }}>
                         <ShieldCheck size={16} style={{ flexShrink: 0, marginTop: 1 }} />
-                        <span>Draft issue-spot routed to <strong>{DOMAINS[routed]?.label || "specialist"}</strong> counsel. In production this creates a ticket + attaches the preliminary brief for human review before any advice is finalized.</span>
+                        <div style={{ flex: 1 }}>
+                          <span>Draft issue-spot routed to <strong>{DOMAINS[routed]?.label || "specialist"}</strong> counsel. In production this creates a ticket + attaches the preliminary brief for human review before any advice is finalized.</span>
+                          <a href="#resume" onClick={() => onNavClick("resume")} style={{ display: "inline-flex", alignItems: "center", gap: 4, marginTop: 8, fontSize: 12.5, fontWeight: 700, color: "#166534", textDecoration: "none" }}>…see why I'd own this <ArrowRight size={14} /></a>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -492,8 +509,8 @@ export default function LegalOpsCopilot() {
                       <span key={j} style={{ fontSize: 12, fontWeight: 600, color: "#4338ca", background: "#eef2ff", border: "1px solid #c7d2fe", borderRadius: 20, padding: "3px 10px" }}>{rg}</span>
                     ))}
                   </div>
-                  <div style={{ fontSize: 12.5, color: "#475569", lineHeight: 1.55, marginBottom: 16 }}>{ant.note}</div>
-                  <a href="#expansion" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#4338ca", textDecoration: "none", background: "#eef2ff", border: "1px solid #c7d2fe", borderRadius: 9, padding: "10px 14px" }}>See Expansion Horizon <ArrowRight size={14} /></a>
+                  <div style={{ fontSize: 12.5, color: "#475569", lineHeight: 1.55, marginBottom: 16 }}>A teaser only — the full, regime-by-regime readiness analysis lives in the Expansion Horizon section.</div>
+                  <a href="#expansion" onClick={() => onNavClick("expansion")} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "#4338ca", textDecoration: "none", background: "#eef2ff", border: "1px solid #c7d2fe", borderRadius: 9, padding: "10px 14px" }}>See the full analysis in Expansion Horizon <ArrowRight size={14} /></a>
                 </div>
               )}
             </div>
@@ -548,6 +565,31 @@ export default function LegalOpsCopilot() {
           divider="#cbd5e1"
           extra={<span style={{ fontSize: 12, color: "#94a3b8", fontWeight: 500 }}>· the person behind the prototype</span>}
         />
+
+        {/* Guardrails — visible teaser of the About modal's full "never let it do" list */}
+        <div style={{ maxWidth: 1160, margin: "0 auto", padding: "8px 20px 0" }}>
+          <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 12, padding: "14px 18px", display: "flex", gap: 12, alignItems: "flex-start" }}>
+            <ShieldCheck size={18} style={{ color: ACCENT, flexShrink: 0, marginTop: 1 }} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.5, color: "#475569", marginBottom: 8 }}>GUARDRAILS · WHAT I'D NEVER SHIP WITHOUT ATTORNEY REVIEW</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 20px" }}>
+                {[
+                  "No consumer-facing legal conclusions (UPL / reliance risk)",
+                  "No AI output treated as authoritative without attorney sign-off",
+                  'No launch auto-approved on a "low risk" tag',
+                ].map((g, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 6, fontSize: 12.5, color: "#334155", lineHeight: 1.4 }}>
+                    <X size={14} style={{ color: "#dc2626", flexShrink: 0, marginTop: 1 }} aria-hidden="true" /> {g}
+                  </div>
+                ))}
+              </div>
+              <button onClick={() => setShowAbout(true)} style={{ marginTop: 10, display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 600, color: ACCENT, background: "none", border: "none", padding: 0, cursor: "pointer" }}>
+                See the full list &amp; how AI fits <ArrowRight size={13} />
+              </button>
+            </div>
+          </div>
+        </div>
+
         <ResumeSection />
       </section>
 
