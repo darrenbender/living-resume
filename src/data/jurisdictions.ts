@@ -178,3 +178,26 @@ export const TIER: Record<TierKey, TierInfo> = {
   medium: { label: 'Moderate', color: '#d97706', bg: '#fffbeb' },
   low: { label: 'Baseline', color: '#16a34a', bg: '#f0fdf4' },
 }
+
+/** An anticipated-expansion market — NOT current operations. */
+export interface AnticipatedMarket {
+  name: string
+  regimes: string[]
+  note: string
+}
+
+// Anticipated-expansion markets — NOT current operations. Illustrative regimes
+// that would activate on expansion; mapped for readiness, requiring attorney
+// verification. Framed as foreseeability and timing, not present obligation.
+export const ANTICIPATED: Record<string, AnticipatedMarket> = {
+  UK: {
+    name: 'United Kingdom',
+    regimes: ['UK GDPR', 'NCSC guidance'],
+    note: 'Post-Brexit divergence from EU rules; distinct security-posture expectations. Not a current market — mapped for expansion readiness.',
+  },
+  EU: {
+    name: 'European Union',
+    regimes: ['GDPR', 'DORA', 'NIS2'],
+    note: 'Foundational data-protection gate (GDPR) plus operational-resilience and security duties (DORA, NIS2) — where forward-looking cryptographic-risk analysis becomes directly relevant.',
+  },
+}
