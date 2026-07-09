@@ -22,3 +22,6 @@ pnpm-debug.log*
 
 # Local personal study notes (kept out of the published repo)
 study-map/
+
+# Design handoff bundle (local reference material, not site source)
+design_handoff_product_counsel/
