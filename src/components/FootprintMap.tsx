@@ -11,10 +11,10 @@ const PAD = 16
 // Non-active geography styling.
 const CANADA_FILL = '#ecfeff' // live footprint, but no per-province sample data
 const CANADA_STROKE = '#67e8f9'
-const NEUTRAL_FILL = '#f1f5f9' // US states with no sample brief ("not in sample")
+const NEUTRAL_FILL = '#fbfcfd' // US states with no sample brief ("not in sample")
 const NEUTRAL_STROKE = '#e2e8f0'
-const MEXICO_FILL = '#eef1f4' // adjacent market — present but not operated
-const MEXICO_STROKE = '#cbd5e1'
+const MEXICO_FILL = '#cbd3dc' // adjacent market — present but not operated
+const MEXICO_STROKE = '#94a3b8'
 
 interface Props {
   selected: string
@@ -120,7 +120,7 @@ export default function FootprintMap({ selected, onSelect }: Props) {
             strokeDasharray={isMexico ? '4 3' : undefined}
             style={{
               cursor: s.active ? 'pointer' : 'default',
-              opacity: isMexico ? 0.6 : isHovered ? 0.82 : 1,
+              opacity: isMexico ? 0.75 : isHovered ? 0.82 : 1,
               transition: 'fill .12s, opacity .12s',
               outline: 'none',
             }}
