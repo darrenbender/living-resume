@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, createElement } from 'react'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import {
   Search,
   AlertTriangle,
@@ -42,6 +42,18 @@ const SCROLL_MARGIN = 132
 const RES_BY_ID: Record<string, (typeof RESEARCH)[number]> = {}
 RESEARCH.forEach((r) => {
   RES_BY_ID[r.id] = r
+})
+
+// Indigo chip for the anticipated-expansion (UK/EU) markets.
+const antChipStyle = (on: boolean): CSSProperties => ({
+  fontSize: 11.5,
+  fontWeight: 600,
+  padding: '4px 10px',
+  borderRadius: 20,
+  cursor: 'pointer',
+  border: `1px solid ${on ? '#4338ca' : '#c7d2fe'}`,
+  background: on ? '#4338ca' : '#eef2ff',
+  color: on ? 'white' : '#4338ca',
 })
 
 // Tracks whether the viewport is at or below a mobile breakpoint.
@@ -96,7 +108,8 @@ export default function LegalOpsCopilot() {
   const [query, setQuery] = useState('')
   const [domainFilter, setDomainFilter] = useState<DomainKey | null>(null)
   const [showAbout, setShowAbout] = useState(false)
-  const [showWelcome, setShowWelcome] = useState(false)
+  // Welcome shows once per page load — no persistence (zero client-side storage).
+  const [showWelcome, setShowWelcome] = useState(true)
   const [routed, setRouted] = useState<DomainKey | null>(null)
   const [activeSection, setActiveSection] = useState('footprint')
   const [hintDismissed, setHintDismissed] = useState(false)
@@ -135,27 +148,10 @@ export default function LegalOpsCopilot() {
     window.setTimeout(release, 1200)
   }
 
-  const markSeen = () => {
-    try {
-      localStorage.setItem('pc_seen_welcome', '1')
-    } catch {
-      /* ignore */
-    }
-  }
   const closeModal = () => {
-    markSeen()
     setShowAbout(false)
     setShowWelcome(false)
   }
-
-  // Welcome panel on first visit only (per browser).
-  useEffect(() => {
-    try {
-      if (!localStorage.getItem('pc_seen_welcome')) setShowWelcome(true)
-    } catch {
-      /* ignore */
-    }
-  }, [])
 
   // Collapse the mobile menu when the viewport grows to desktop.
   useEffect(() => {
@@ -311,10 +307,62 @@ export default function LegalOpsCopilot() {
           extra={<span style={{ fontSize: 12, color: "#94a3b8", fontWeight: 500 }}>· current footprint & anticipated expansion</span>}
         />
         <div style={{ maxWidth: 1160, margin: "0 auto", display: "flex", flexWrap: "wrap", gap: 16, padding: "16px 20px 20px", alignItems: "flex-start" }}>
-          {/* Left: triage + geographic map */}
+          {/* Left: map + anticipated selector + triage */}
           <div style={{ flex: "1 1 420px", minWidth: 320 }}>
+            {/* Geographic map */}
+            <div style={{ position: "relative", background: "white", border: "1px solid #e2e8f0", borderRadius: 12, padding: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+                <MapIcon size={15} color="#94a3b8" />
+                <span style={{ fontSize: 12.5, fontWeight: 600, color: "#475569" }}>Current footprint · geographic view</span>
+                <span style={{ fontSize: 11, color: "#94a3b8" }}>Click a shaded jurisdiction for its sample issue-spot brief.</span>
+              </div>
+              {!hintDismissed && (
+                <div className="sc-pulse" style={{ position: "absolute", top: 58, left: "50%", transform: "translateX(-50%)", zIndex: 5, display: "flex", alignItems: "center", gap: 7, background: "#0f172a", color: "white", fontSize: 12, fontWeight: 600, padding: "7px 13px", borderRadius: 999, animation: "scpulse 2s ease-out infinite", pointerEvents: "none" }}>
+                  <MousePointerClick size={14} style={{ color: ACCENT }} /> Pick a jurisdiction
+                </div>
+              )}
+              <div style={{ maxWidth: 640, margin: "0 auto" }}>
+                <FootprintMap selected={selected} onSelect={select} />
+              </div>
+              <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 12, flexWrap: "wrap" }}>
+                {Object.values(TIER).map((v) => (
+                  <div key={v.label} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, color: "#64748b" }}>
+                    <span style={{ width: 12, height: 12, borderRadius: 3, background: v.bg, border: "1px solid " + v.color }} /> {v.label}
+                  </div>
+                ))}
+                <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, color: "#64748b" }}>
+                  <span style={{ width: 12, height: 12, borderRadius: 3, background: ACCENT }} /> Selected
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, color: "#64748b" }}>
+                  <span style={{ width: 12, height: 12, borderRadius: 3, background: "#fbfcfd", border: "1px solid #e2e8f0" }} /> Not in sample
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, color: "#64748b" }}>
+                  <span style={{ width: 12, height: 12, borderRadius: 3, background: "#cbd3dc", border: "1px dashed #94a3b8" }} /> Adjacent (Mexico)
+                </div>
+              </div>
+              <div style={{ textAlign: "center", fontSize: 11, color: "#94a3b8", marginTop: 9, lineHeight: 1.5 }}>Tiers show <strong>illustrative regulatory complexity</strong> — Elevated (most complex) · Moderate · Baseline (most standard). Not a formal risk assessment.</div>
+            </div>
+
+            {/* Anticipated expansion selector — not current markets, not on the map */}
+            <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 12, padding: 14, marginTop: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 9, flexWrap: "wrap" }}>
+                <span style={{ width: 9, height: 9, borderRadius: 2, background: "#4338ca" }} />
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.6, color: "#64748b" }}>ANTICIPATED EXPANSION</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: "#4338ca", background: "#eef2ff", border: "1px solid #c7d2fe", padding: "1px 7px", borderRadius: 10 }}>NOT CURRENT</span>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {Object.keys(ANTICIPATED).map((c) => {
+                  const on = selected === c
+                  return (
+                    <button key={c} onClick={() => select(c)} aria-pressed={on} aria-label={`${ANTICIPATED[c].name}, anticipated market`} style={antChipStyle(on)}>{ANTICIPATED[c].name}</button>
+                  )
+                })}
+              </div>
+              <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 8, lineHeight: 1.5 }}>Not a current market — select for an expansion-readiness brief. These markets aren't on the map above.</div>
+            </div>
+
             {/* Triage search */}
-            <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 12, padding: 14, marginBottom: 16 }}>
+            <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 12, padding: 14, marginTop: 16 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: "#475569" }}>Ask a product-launch question</div>
                 <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.3, color: "#64748b", background: "#f1f5f9", border: "1px solid #e2e8f0", padding: "2px 7px", borderRadius: 10 }}>KEYWORD TRIAGE · SAMPLE</span>
@@ -354,40 +402,6 @@ export default function LegalOpsCopilot() {
                   ))}
                 </div>
               )}
-            </div>
-
-            {/* Geographic map */}
-            <div style={{ position: "relative", background: "white", border: "1px solid #e2e8f0", borderRadius: 12, padding: 16 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
-                <MapIcon size={15} color="#94a3b8" />
-                <span style={{ fontSize: 12.5, fontWeight: 600, color: "#475569" }}>Current footprint · geographic view</span>
-                <span style={{ fontSize: 11, color: "#94a3b8" }}>Click a shaded jurisdiction for its sample issue-spot brief.</span>
-              </div>
-              {!hintDismissed && (
-                <div className="sc-pulse" style={{ position: "absolute", top: 58, left: "50%", transform: "translateX(-50%)", zIndex: 5, display: "flex", alignItems: "center", gap: 7, background: "#0f172a", color: "white", fontSize: 12, fontWeight: 600, padding: "7px 13px", borderRadius: 999, animation: "scpulse 2s ease-out infinite", pointerEvents: "none" }}>
-                  <MousePointerClick size={14} style={{ color: ACCENT }} /> Pick a jurisdiction
-                </div>
-              )}
-              <div style={{ maxWidth: 640, margin: "0 auto" }}>
-                <FootprintMap selected={selected} onSelect={select} />
-              </div>
-              <div style={{ display: "flex", gap: 14, justifyContent: "center", marginTop: 12, flexWrap: "wrap" }}>
-                {Object.values(TIER).map((v) => (
-                  <div key={v.label} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, color: "#64748b" }}>
-                    <span style={{ width: 12, height: 12, borderRadius: 3, background: v.bg, border: "1px solid " + v.color }} /> {v.label}
-                  </div>
-                ))}
-                <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, color: "#64748b" }}>
-                  <span style={{ width: 12, height: 12, borderRadius: 3, background: ACCENT }} /> Selected
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, color: "#64748b" }}>
-                  <span style={{ width: 12, height: 12, borderRadius: 3, background: "#fbfcfd", border: "1px solid #e2e8f0" }} /> Not in sample
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, color: "#64748b" }}>
-                  <span style={{ width: 12, height: 12, borderRadius: 3, background: "#cbd3dc", border: "1px dashed #94a3b8" }} /> Adjacent (Mexico)
-                </div>
-              </div>
-              <div style={{ textAlign: "center", fontSize: 11, color: "#94a3b8", marginTop: 9, lineHeight: 1.5 }}>Tiers show <strong>illustrative regulatory complexity</strong> — Elevated (most complex) · Moderate · Baseline (most standard). Not a formal risk assessment.</div>
             </div>
           </div>
 
