@@ -6,7 +6,7 @@ export default function ExpansionView() {
     <div style={{ padding: 20 }}>
       <div style={{ background: "#eef2ff", border: "1px dashed #a5b4fc", borderRadius: 12, padding: "14px 18px", marginBottom: 16, fontSize: 13, color: "#3730a3", display: "flex", gap: 10 }}>
         <Info size={17} style={{ flexShrink: 0, marginTop: 1 }} />
-        <span><strong>Expansion-readiness view — not current footprint.</strong> Instacart operates today in the US &amp; Canada. This role's brief cites GDPR and international e-commerce law, signaling growth intent. This layer maps the regimes that would activate on expansion — illustrative, requiring attorney verification, framed as strategic readiness rather than present obligation.</span>
+        <span><strong>Expansion-readiness view — not current footprint.</strong> Instacart operates today in the US & Canada. This role's brief cites GDPR and international e-commerce law, signaling growth intent. This layer maps the regimes that would activate on expansion — illustrative, requiring attorney verification, framed as strategic readiness rather than present obligation.</span>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
         {EXPANSION_REGIONS.map((r, i) => (
