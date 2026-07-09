@@ -8,7 +8,7 @@ export default function ProductWorkstream() {
     <div style={{ maxWidth: 1160, margin: "0 auto", padding: "16px 20px 20px" }}>
       <div style={{ background: "#f0fdfa", border: "1px solid #99f6e4", borderRadius: 12, padding: "14px 18px", marginBottom: 16, fontSize: 13, color: "#115e59", display: "flex", gap: 10 }}>
         <Package size={17} style={{ flexShrink: 0, marginTop: 1 }} />
-        <span><strong>Product-embedded counsel.</strong> Three initiatives relevant to the role. Caper Carts and Storefront Pro are real Instacart products; a Claude-powered shopping assistant is an illustrative AI initiative. The regimes and backlog are illustrative — how I'd sit with each product team, map the applicable law, and run the contract playbook. Not legal advice.</span>
+        <span><strong>Product-embedded counsel.</strong> Three initiatives relevant to the role. Caper Carts, Storefront Pro, and Instacart's agentic shopping integration inside Anthropic's Claude are all real; the regimes and counsel backlog here are illustrative — how I'd sit with each product team, map the applicable law, and run the contract playbook. Not legal advice.</span>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 14 }}>
         {INITIATIVES.map((p) => (

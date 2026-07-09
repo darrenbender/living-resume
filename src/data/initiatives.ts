@@ -74,8 +74,8 @@ export const INITIATIVES: Initiative[] = [
     playbook: 'Retailer Partnership Playbook · MSA · DPA · ad-inventory addendum',
   },
   {
-    name: 'Claude Assistant', tag: 'Gen-AI · shopping copilot', icon: Sparkles, color: '#d97706',
-    what: 'An AI shopping assistant powered by Claude: natural-language cart building, recipe-to-basket, and dietary Q&A across the catalog.',
+    name: 'Instacart in Claude', tag: 'Agentic connector · Anthropic Claude', icon: Sparkles, color: '#d97706',
+    what: `Instacart's agentic shopping integration inside Anthropic's Claude: Claude turns natural-language and recipe requests into a filled Instacart cart — and deliberately stops at the cart rather than embedding checkout.`,
     laws: [
       { label: 'AI vendor DPA', tone: 'high' },
       { label: 'Dietary / health disclaimers', tone: 'high' },
